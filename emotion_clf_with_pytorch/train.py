@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.model_selection import train_test_split
-from utils.dataset import DEAPDataset
+from dataset.dataset import DEAPDataset
 from torch.utils.data import DataLoader
 
 def train(model, X, y, args):

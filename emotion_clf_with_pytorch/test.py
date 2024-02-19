@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from utils.dataset import DEAPDataset
+from dataset.dataset import DEAPDataset
 
 activation = {}
 def get_activation(name):
