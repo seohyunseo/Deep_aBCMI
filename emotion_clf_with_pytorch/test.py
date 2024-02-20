@@ -2,6 +2,7 @@ import torch
 import csv
 from torch.utils.data import DataLoader
 from dataset.dataset import DEAPDataset
+import numpy as np
 
 activation = {}
 def get_activation(name):
@@ -56,13 +57,13 @@ def test_intermediate_features(model, X, y, file_path, layer):
                 
                 if int(predicted_labels) == int(test_labels):
 
-                    feature = activation[layer].cpu().numpy()
+                    feature = [float('%.4f' % value) for value in activation[layer].cpu().flatten()]
 
                     print(f"Trial[{idx+1}] prediction: {int(predicted_labels)}, truth: {int(test_labels)}")
                     print(f"Intermediate features: {feature}\n")
 
                     intermediate_features.append(feature)
-                    csvwriter.writerow([idx+1, feature.flatten().tolist(), int(predicted_labels)])
+                    csvwriter.writerow([idx+1, feature, int(predicted_labels)])
 
                 correct_predictions += (predicted_labels == test_labels).sum().item()
 

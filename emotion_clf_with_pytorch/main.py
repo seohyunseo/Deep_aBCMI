@@ -42,7 +42,7 @@ def main(args):
     elif args.task_type == 'intermediate':
 
         model_path = args.model_path + args.model_name + '.pt'
-        feature_path = args.feature_path  + args.model_name + '.csv'
+        feature_path = args.feature_path  + args.model_name + '_' + args.feature_layer +'.csv'
         model = torch.load(model_path)
         intermediate_features = test_intermediate_features(model, X_test, y_test, feature_path, args.feature_layer)
 
