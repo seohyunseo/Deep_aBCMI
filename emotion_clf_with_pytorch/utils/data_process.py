@@ -24,8 +24,8 @@ def get_feature(data):
         feature_matrix.append(np.array(list(chain.from_iterable(features))))
     return np.array(feature_matrix)
 
-# Label Extraction
-def get_class_labels(labels, class_type):
+# Label extraction
+def get_labels(labels, class_type):
     # encoding
     num_labels = labels.shape[0]
     emotion = np.ones(num_labels)
@@ -73,3 +73,22 @@ def apply_sliding_window(data, window_size, overlap_size, sampling_rate):
                 new_data[trial, channel, i, :] = data[trial, channel, start_idx:end_idx]
 
     return new_data
+
+# Features and labels extraction
+def get_features_labels(dataset, args):
+    # separate data and labels
+    data = np.array(dataset['data']) # for current data
+    labels = np.array(dataset['labels']) # for current labels
+    # remove 3sec pre baseline
+    data  = data[0:40,0:32,384:8064]
+
+    # Apply sliding window to EEG data
+    data = apply_sliding_window(data, args.window_size, args.overlap_size, args.sampling_rate)
+
+    windowed_data = data.reshape(-1, data.shape[1], data.shape[3])
+    windowed_labels = np.repeat(labels, data.shape[2], axis=0)
+
+    features = get_feature(windowed_data)
+    labels = get_labels(windowed_labels, args.class_type)
+
+    return features, labels
