@@ -157,7 +157,7 @@ if __name__ == '__main__':
         emotion_tag = i
         res, _ = net.inference_from_scratch(dictionary, emotion_tag, n_token=8, display=False, max_bar=max_bar) # generate
 
-        path_outfile = f'./midi/objective/Q{i}_obj_emotion' # output midi file name
+        path_outfile = f'./midi/objective_emotion/Q{i}_obj_emotion' # output midi file name
         write_midi(res, path_outfile + '.mid', word2event, max_bar)
         print(f"\n=> Midi example {i} with emotion[{emotion_tag}] completed.")
 

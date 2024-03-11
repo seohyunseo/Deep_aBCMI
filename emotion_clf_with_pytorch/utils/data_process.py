@@ -2,11 +2,12 @@ import mne, warnings
 import numpy as np # done in mac m1
 from itertools import chain
 import matplotlib.pyplot as plt
+import scipy.io
 warnings.filterwarnings('ignore')
 mne.set_log_level('WARNING')
 
 # Feature extraction
-def get_feature(data):
+def get_psd(data):
     channel_no = [0, 2, 16, 19] # only taking these four channels
     feature_matrix = []
     for ith_video in range(data.shape[0]):
@@ -23,6 +24,12 @@ def get_feature(data):
         # flatten the features i.e. transform it from 2D to 1D
         feature_matrix.append(np.array(list(chain.from_iterable(features))))
     return np.array(feature_matrix)
+
+def get_raw(data):
+    
+    raw_matrix = data.reshape(data.shape[0], -1)
+    
+    return raw_matrix
 
 # Label extraction
 def get_labels(labels, class_type):
@@ -75,20 +82,54 @@ def apply_sliding_window(data, window_size, overlap_size, sampling_rate):
     return new_data
 
 # Features and labels extraction
-def get_features_labels(dataset, args):
+def get_features_labels(dataset, ch_no, args):
     # separate data and labels
     data = np.array(dataset['data']) # for current data
     labels = np.array(dataset['labels']) # for current labels
     # remove 3sec pre baseline
-    data  = data[0:40,0:32,384:8064]
+    data  = data[0:40,:,384:8064]
+    data = np.take(np.array(data), ch_no, axis=1)
 
     # Apply sliding window to EEG data
     data = apply_sliding_window(data, args.window_size, args.overlap_size, args.sampling_rate)
 
-    windowed_data = data.reshape(-1, data.shape[1], data.shape[3])
+    windowed_data = data.transpose(0, 2, 1, 3)
+    windowed_data = windowed_data.reshape(windowed_data.shape[0]* windowed_data.shape[1], windowed_data.shape[2], windowed_data.shape[3])
     windowed_labels = np.repeat(labels, data.shape[2], axis=0)
 
-    features = get_feature(windowed_data)
+    features = get_raw(windowed_data)
     labels = get_labels(windowed_labels, args.class_type)
+
+    return features, labels
+
+def load_data(data_path, sub_no, ch_no, args):
+
+    data_path = data_path + sub_no + '.mat'
+    deap_dataset = scipy.io.loadmat(data_path)
+    features, labels = get_features_labels(deap_dataset, ch_no, args)
+
+    return features, labels
+
+def load_n_data(data_path, sub_no, ch_no, args):
+
+    n_features = []
+    n_labels = []
+    for n in range(0, sub_no): 
+        s = ''
+        if (n+1) < 10:
+            s += '0'
+        s += str(n+1)
+
+        filename = data_path +"s" + s + ".mat"
+        deap_dataset = scipy.io.loadmat(filename)
+        # separate data and labels   
+        features, labels = get_features_labels(deap_dataset, ch_no, args)
+        n_features.append(features)
+        n_labels.append(labels)
+
+    n_features = np.array(n_features)
+    n_labels = np.array(n_labels)
+    features = n_features.reshape(n_features.shape[0]*n_features.shape[1], n_features.shape[2])
+    labels = n_labels.reshape(n_labels.shape[0]*n_labels.shape[1])
 
     return features, labels

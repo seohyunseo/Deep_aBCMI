@@ -7,7 +7,7 @@ from dataset.dataset import DEAPDataset
 from torch.utils.data import DataLoader, SubsetRandomSampler
 
 def train(model, X, y, args):
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42) # Split the dataset into training and validation sets
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.4, shuffle=False) # Split the dataset into training and validation sets
 
     train_torch= DEAPDataset(X_train, y_train)
     train_dataloader = DataLoader(train_torch, batch_size=args.batch_size, shuffle=True)
@@ -41,6 +41,7 @@ def train(model, X, y, args):
             with torch.no_grad():
                 val_epoch_loss = 0.0
                 val_correct_predictions = 0
+
                 for val_inputs, val_labels in val_dataloader:
                     val_outputs = model(val_inputs)
                     val_loss = criterion(val_outputs, val_labels.long())

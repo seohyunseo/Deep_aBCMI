@@ -16,6 +16,7 @@ config['model'] = {
     'weight_decay':.0,
     'model_path': './save/models/',
     'model_name': 'MLP'
+    'dropout_rate': 0.5
 }
 
 with open('./config.ini', 'w') as f:
